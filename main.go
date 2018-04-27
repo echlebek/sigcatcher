@@ -24,7 +24,13 @@ func main() {
 		select {
 		case <-ticker.C:
 			nSignals := atomic.LoadInt64(&signalCounter)
-			fmt.Printf("\r %d signals/s (%d total)", (nSignals-prevSignals)*4, nSignals)
+			window := nSignals - prevSignals
+			perSecond := (window - 4) * 4
+			if perSecond < 0 {
+				perSecond = 0
+			}
+			perSecond += window % 4
+			fmt.Printf("\r %d signals/s (%d total)", perSecond, nSignals)
 			prevSignals = nSignals
 		case sig := <-ch:
 			switch sig {
